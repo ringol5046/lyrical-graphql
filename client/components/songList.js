@@ -5,11 +5,16 @@ import { Link } from 'react-router';
 import fetchSongs from '../queries/fetchSongs'
 
 class SongList extends React.Component {
+  onSongDelete(id) {
+    this.props.mutate({variables: { id } })
+      .then(() => {this.props.data.refetch()});
+  }
   renderSong() {
-    return this.props.data.songs.map(song => {
+    return this.props.data.songs.map(({ id, title }) => {
       return (
-        <li key={song.id} className='collection-item'>
-          {song.title}
+        <li key={id} className='collection-item'>
+          {title}
+          <i className='material-icons' onClick={() => this.onSongDelete(id)}>delete</i>
         </li>
       );
     });
@@ -34,4 +39,12 @@ class SongList extends React.Component {
   }
 }
 
-export default graphql(fetchSongs)(SongList);
+const mutation = gql`
+  mutation DeleteSong($id: ID) {
+    deleteSong(id: $id) {
+      id
+    }
+  }
+`;
+
+export default graphql(mutation)(graphql(fetchSongs)(SongList));
