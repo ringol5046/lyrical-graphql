@@ -1,4 +1,6 @@
 import React from 'react';
+import gql from 'graphql-tag';
+import { graphql } from 'react-apollo';
 
 class LyricCreate extends React.Component {
   constructor(props) {
@@ -8,6 +10,12 @@ class LyricCreate extends React.Component {
   }
   onSubmit(event) {
     event.preventDefault();
+    this.props.mutate({
+      variables: {
+        content: this.state.content,
+        songId:this.props.songId
+      }
+    }).then(() => this.setState({ content: '' }));
   }
   render() {
     return (
@@ -22,4 +30,17 @@ class LyricCreate extends React.Component {
   }
 }
 
-export default LyricCreate;
+const mutation = gql`
+  mutation AddLyricToSong($content: String, $songId: ID) {
+    addLyricToSong(content: $content, songId: $songId) {
+      id
+      lyrics {
+        id
+        content
+        likes
+      }
+    }
+  }
+`;
+
+export default graphql(mutation)(LyricCreate);
